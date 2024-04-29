@@ -13,6 +13,9 @@ import java.util.logging.Logger;
 import javax.swing.SpinnerDateModel;
 import javax.swing.JSpinner;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -244,6 +247,7 @@ public class MeetUI extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+ List<String> participantsList=new ArrayList<>();
 
     private void txtTokenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTokenActionPerformed
         // TODO add your handling code here:
@@ -263,12 +267,20 @@ public class MeetUI extends javax.swing.JFrame {
 
     private void jButton_Create_meetingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_Create_meetingActionPerformed
         // TODO add your handling code here:
-        CreateNewMeet.getDetails(txtToken.getText().toString(),txtTitle.getText().toString(),jMeetDate.getDate().toString(), jSpinner1_start.getValue().toString(), jSpinner2_end.getValue().toString(), jTextArea_Participants_list.getText().toString());
+        CreateNewMeet.getDetails(txtToken.getText().toString(),txtTitle.getText().toString(),jMeetDate.getDate().toString(), jSpinner1_start.getValue().toString(), jSpinner2_end.getValue().toString(), participantsList);
     }//GEN-LAST:event_jButton_Create_meetingActionPerformed
 
     private void jButton_add_participantActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_add_participantActionPerformed
         // TODO add your handling code here:
-        jTextArea_Participants_list.setText(txtParticipants.getText().toString());
+        participantsList.add(txtParticipants.getText().toString());
+        
+StringBuilder participantsText = new StringBuilder();
+for (String participant : participantsList) {
+  participantsText.append(participant).append("\n");
+}
+
+// Set the text of JTextArea
+jTextArea_Participants_list.setText(participantsText.toString());
     }//GEN-LAST:event_jButton_add_participantActionPerformed
 
     /**

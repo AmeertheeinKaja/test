@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,7 +50,7 @@ public class CreateNewMeet {
         return null;
     }
        
-public static void getDetails(String accessToken,String subject, String Date,String start_time, String end_time, String attendees){
+public static void getDetails(String accessToken,String subject, String Date,String start_time, String end_time, List<String> attendees){
     
     
     
@@ -61,6 +62,12 @@ public static void getDetails(String accessToken,String subject, String Date,Str
             System.out.println("participant"+attendees);
             
             
+            
+                  StringBuilder attendeesJSON = new StringBuilder();
+        for (String attendee : attendees) {
+            attendeesJSON.append("{\"upn\":\"").append(attendee).append("\"},");
+        }
+            
 String bodyStr = "{"
         + "\"startDateTime\": \"" + convertToUTC(start_time) + "\","
         + "\"endDateTime\": \"" + convertToUTC(end_time) + "\","
@@ -69,8 +76,7 @@ String bodyStr = "{"
         +     "\"isPasscodeRequired\": true"
         + "},"
         + "\"participants\": {"
-        +     "\"attendees\": [{"
-        + "\"upn\":\""+attendees+"\"}]"
+        +     "\"attendees\": ["+ attendeesJSON.toString() +"]"
       + "}"
         + "}";
 
@@ -97,14 +103,17 @@ String bodyStr = "{"
 String responseBodyString = response.body().string();
         System.out.println("Meeting Creation Response :: " + responseBodyString);
         JSONObject jsonObject1 = new JSONObject(responseBodyString);
-        
+        System.out.println(responseBodyString);
         addToCalendar(accessToken,jsonObject1.getString("startDateTime"),
                 jsonObject1.getString("endDateTime"),jsonObject1.getString("joinUrl"),
                 jsonObject1.getString("subject"),
-                jsonObject1.getJSONObject("participants")
-                          .getJSONArray("attendees")
-                          .getJSONObject(0)
-                          .getString("upn"));
+//                jsonObject1.getJSONObject("participants")
+//                          .getJSONArray("attendees")
+//                          .getJSONObject(i)
+//                          .getString("upn")
+        
+        attendees
+        );
         } catch (IOException ex) {
             Logger.getLogger(CreateNewMeet.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -113,15 +122,27 @@ String responseBodyString = response.body().string();
 
 
 
-public static String addToCalendar( String accessToken,String startDateTime,String endDateTime, String joinUrl,String subject,String email ){
+public static String addToCalendar( String accessToken,String startDateTime,String endDateTime, String joinUrl,String subject,List<String> attendees ){
 
+    
+StringBuilder attendeesJSON = new StringBuilder();
+for (int i = 0; i < attendees.size(); i++) {
+    String email = attendees.get(i);
+    attendeesJSON.append("{")
+                 .append("\"emailAddress\":{\"address\":\"").append(email).append("\",\"name\":\"\"},")
+                 .append("\"type\":\"required\"}");
+    // Add a comma if this is not the last attendee
+    if (i < attendees.size() - 1) {
+        attendeesJSON.append(",");
+    }
+}
 String bodyStr = "{\"subject\":\"" + subject + "\","
         + "\"start\":{\"dateTime\":\"" + removeZ(startDateTime) + "\","
         + "\"timeZone\":\"India Standard Time\"},\"end\":{\"dateTime\":\"" + removeZ(endDateTime) + "\","
         + "\"timeZone\":\"India Standard Time\"},"
         + "\"body\":{\"contentType\":\"HTML\",\"content\":\"Join the meeting using the following link: <a href=\'" + joinUrl + "\'>Join Meeting</a>\"},"
         + "\"location\":{\"displayName\":\"Virtual Meeting\"},"
-        + "\"attendees\":[{\"emailAddress\":{\"address\":\"" + email + "\",\"name\":\"\"},\"type\":\"required\"}]}"
+        + "\"attendees\":["+ attendeesJSON.toString() +"]}"
           + "}";
 
 
